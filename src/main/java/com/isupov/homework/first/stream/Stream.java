@@ -18,7 +18,7 @@ public class Stream {
         List<Integer> evenList = integerList.stream()
                 .filter(i -> i % 2 == 0)
                 .collect(Collectors.toList());
-        System.out.println("Черные числа: " + evenList);
+        System.out.println("Четные числа: " + evenList);
 
         System.out.println("\n=====================\n");
 
