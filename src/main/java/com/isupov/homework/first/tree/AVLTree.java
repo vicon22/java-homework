@@ -1,8 +1,6 @@
 package com.isupov.homework.first.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class AVLTree<V> implements Tree<V> {
 
@@ -81,7 +79,7 @@ public class AVLTree<V> implements Tree<V> {
             return current;
         }
 
-        return current;
+        return rebalance(current);
     }
 
     @Override
@@ -115,28 +113,45 @@ public class AVLTree<V> implements Tree<V> {
             return null;
         }
         int cmp = v.compareTo(current.data);
-        if (cmp == 0) {
-            if (current.left == null && current.right == null) {
-                return null;
-            }
-            if (current.right == null) {
-                return current.left;
-            }
-            if (current.left == null) {
-                return current.right;
-            }
-            V smallestValue = findSmallestValue(current.right);
-            current.data = smallestValue;
-            current.right = removeRecursive(current.right, (Comparable<? super V>) smallestValue);
-            return current;
-
-
-        }
         if (cmp < 0) {
             current.left = removeRecursive(current.left, v);
-            return current;
+        } else if (cmp > 0) {
+            current.right = removeRecursive(current.right, v);
+        } else {
+            if (current.left == null || current.right == null) {
+                current = (current.left == null) ?  current.right : current.left;
+            } else {
+                V smallestValue = findSmallestValue(current.right);
+                current.data = smallestValue;
+                current.right = removeRecursive(current.right, (Comparable<? super V>) smallestValue);
+            }
         }
-        current.right = removeRecursive(current.right, v);
+
+        if (current != null) {
+            current = rebalance(current);
+        }
+        return current;
+    }
+
+    private Node<V> rebalance(Node<V> current) {
+        updateHeight(current);
+        int balance = getBalance(current);
+        if (balance > 1) {
+            if (height(current.right.right) > height(current.right.left)) {
+                current = rotateLeft(current);
+            } else {
+                current.right = rotateRight(current.right);
+                current = rotateLeft(current);
+            }
+        } else if (balance < -1) {
+            if (height(current.left.left) > height(current.left.right)) {
+                current = rotateRight(current);
+            } else {
+                current.left = rotateLeft(current.left);
+                current = rotateRight(current);
+            }
+        }
+
         return current;
     }
 
@@ -152,7 +167,7 @@ public class AVLTree<V> implements Tree<V> {
     @Override
     public List<V> values() {
         List<V> values = new ArrayList<>();
-        traverseInOrder(rootNode, values);
+        traverseLevelOrder(rootNode, values);
         return values;
     }
 
@@ -160,7 +175,30 @@ public class AVLTree<V> implements Tree<V> {
         if (current != null) {
             traverseInOrder(current.left, values);
             values.add(current.data);
+            System.out.println(current.data);
             traverseInOrder(current.right, values);
+        }
+    }
+
+    private void traverseLevelOrder(Node<V> current, List<V> values) {
+        if (current == null) {
+            return;
+        }
+
+        Queue<Node<V>> nodes = new LinkedList<>();
+        nodes.add(current);
+
+        while (!nodes.isEmpty()) {
+
+            Node<V> node = nodes.remove();
+            values.add(node.data);
+
+            if (node.left != null) {
+                nodes.add(node.left);
+            }
+            if (node.right != null) {
+                nodes.add(node.right);
+            }
         }
     }
 }

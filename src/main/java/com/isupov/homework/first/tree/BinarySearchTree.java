@@ -1,8 +1,6 @@
 package com.isupov.homework.first.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class BinarySearchTree<V> implements Tree<V> {
 
@@ -105,7 +103,7 @@ public class BinarySearchTree<V> implements Tree<V> {
     @Override
     public List<V> values() {
         List<V> values = new ArrayList<>();
-        traverseInOrder(rootNode, values);
+        traverseLevelOrder(rootNode, values);
         return values;
     }
 
@@ -114,6 +112,28 @@ public class BinarySearchTree<V> implements Tree<V> {
             traverseInOrder(current.left, values);
             values.add(current.data);
             traverseInOrder(current.right, values);
+        }
+    }
+
+    private void traverseLevelOrder(Node<V> current, List<V> values) {
+        if (current == null) {
+            return;
+        }
+
+        Queue<Node<V>> nodes = new LinkedList<>();
+        nodes.add(current);
+
+        while (!nodes.isEmpty()) {
+
+            Node<V> node = nodes.remove();
+            values.add(node.data);
+
+            if (node.left != null) {
+                nodes.add(node.left);
+            }
+            if (node.right != null) {
+                nodes.add(node.right);
+            }
         }
     }
 
