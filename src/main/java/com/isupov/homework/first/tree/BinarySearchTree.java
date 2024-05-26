@@ -66,28 +66,20 @@ public class BinarySearchTree<V> implements Tree<V> {
             return null;
         }
         int cmp = v.compareTo(current.data);
-        if (cmp == 0) {
-            if (current.left == null && current.right == null) {
-                return null;
-            }
-            if (current.right == null) {
-                return current.left;
-            }
-            if (current.left == null) {
-                return current.right;
-            }
-            V smallestValue = findSmallestValue(current.right);
-            current.data = smallestValue;
-            current.right = removeRecursive(current.right, (Comparable<? super V>) smallestValue);
-            return current;
-
-
-        }
         if (cmp < 0) {
             current.left = removeRecursive(current.left, v);
-            return current;
+        } else if (cmp > 0) {
+            current.right = removeRecursive(current.right, v);
+        } else {
+            if (current.left == null || current.right == null) {
+                current = (current.left == null) ?  current.right : current.left;
+            } else {
+                V smallestValue = findSmallestValue(current.right);
+                current.data = smallestValue;
+                current.right = removeRecursive(current.right, (Comparable<? super V>) smallestValue);
+            }
         }
-        current.right = removeRecursive(current.right, v);
+
         return current;
     }
 
