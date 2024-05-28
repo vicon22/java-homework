@@ -74,36 +74,46 @@ public class RBTree implements Tree<Integer> {
     }
 
     private void putFixup(Node node){
-        Node y;
+        Node uncle;
+        //Если цвет родителя current оказывается красным, то нам необходимо провести ротацию узлов
         while (node.parent.color == Node.RED) {
+            // когда родитель - оказывается левой веткой
             if (node.parent.equals(node.parent.parent.left)) {
-                y = node.parent.parent.right;
-                if (y.color == Node.RED) {
+                // определяем дядю узел-дядя
+                uncle = node.parent.parent.right;
+                // Если дядя красный: дядю и родителя перекрашиваем в черный, прародитель становится красным, node - становится прародителем
+                if (uncle.color == Node.RED) {
                     node.parent.color = Node.BLACK;
-                    y.color = Node.BLACK;
+                    uncle.color = Node.BLACK;
                     node.parent.parent.color = Node.RED;
                     node = node.parent.parent;
-                } else {
+                } else {//Если дядя черный
+                    // Если дядя черный и это правая подветвь: node-становится родителем и совершается левый поворот
                     if (node.equals(node.parent.right)) {
                         node = node.parent;
                         LeftRotate(node);
                     }
+                    //Если дядя черный: родитель становится черным, прародитель становится красным и прародитель совершает правый поворот
                     node.parent.color = Node.BLACK;
                     node.parent.parent.color = Node.RED;
                     RightRotate(node.parent.parent);
                 }
-            } else {
-                y = node.parent.parent.left;
-                if (y.color == Node.RED) {
+            } else {//когда родитель - оказывается правой веткой
+                // определяем дядю узел-дядя
+                uncle = node.parent.parent.left;
+                // Если дядя красный, родитель и дядя становятся красными, прародитель становится красным, node - становится прародителем
+                if (uncle.color == Node.RED) {
                     node.parent.color = Node.BLACK;
-                    y.color = Node.BLACK;
+                    uncle.color = Node.BLACK;
                     node.parent.parent.color = Node.RED;
                     node = node.parent.parent;
-                } else {
+                } else {//Если дядя черный
+                    // Если дядя черный и это левая подветвь: node-становится родителем и совершается правый поворот
                     if (node.equals(node.parent.left)) {
                         node = node.parent;
                         RightRotate(node);
                     }
+                    // Если дядя черный: родитель становится черным, прародитель становится красным и прародитель совершает левый поворот
                     node.parent.color = Node.BLACK;
                     node.parent.parent.color = Node.RED;
                     LeftRotate(node.parent.parent);
@@ -221,57 +231,68 @@ public class RBTree implements Tree<Integer> {
     }
 
     private void removeFixup(Node node) {
-        Node w;
+        Node sibling;
+
+        // Пока узел это не корень и он черного цвета
         while (!node.equals(root) && node.color == Node.BLACK) {
+            // если node - это левая подветвь
             if (node.equals(node.parent.left)) {
-                w = node.parent.right;
-                if (w.color == Node.RED) {
-                    w.color = Node.BLACK;
-                    w.parent.color = Node.RED;
+                sibling = node.parent.right;
+                // Если близнец красный: близнец становится черным, родитель становится красным, Левый поворот, обновляем близнеца
+                if (sibling.color == Node.RED) {
+                    sibling.color = Node.BLACK;
+                    sibling.parent.color = Node.RED;
                     LeftRotate(node.parent);
-                    w = node.parent.right;
+                    sibling = node.parent.right;
                 }
 
-                if (w.left.color == Node.BLACK && w.right.color == Node.BLACK) {
-                    w.color = Node.RED;
+                // Если дети близнеца черные: близнец становится красным, родитель становится node
+                if (sibling.left.color == Node.BLACK && sibling.right.color == Node.BLACK) {
+                    sibling.color = Node.RED;
                     node = node.parent;
                 } else {
-                    if (w.right.color == Node.BLACK) {
-                        w.left.color = Node.RED;
-                        w.color =  Node.BLACK;
+                    // Если близнец черный и только его правый ребенок красный: его левый ребенок становится красный, близнец становится черный, правый поворот, обновляем близнеца
+                    if (sibling.right.color == Node.BLACK) {
+                        sibling.left.color = Node.RED;
+                        sibling.color =  Node.BLACK;
                         RightRotate(node);
-                        w = node.parent.right;
+                        sibling = node.parent.right;
                     }
 
-                    w.color = node.parent.color;
+                    // Перекрашиваем близнеца в цвет родителя, а родителя становится черным, правый ребенок близнеца становится черным и мы совершаем левый поворот
+                    sibling.color = node.parent.color;
                     node.parent.color = Node.BLACK;
-                    w.right.color = Node.BLACK;
+                    sibling.right.color = Node.BLACK;
                     LeftRotate(node.parent);
                     node = root;
                 }
-            } else {
-                w = node.parent.left;
-                if (w.color == Node.RED) {
-                    w.color =  Node.BLACK;
-                    w.parent.color = Node.RED;
+            } else {// если node - это правая подветвь
+                sibling = node.parent.left;
+                // Если близнец красный: близнец становится черным, родитель становится красным, Правый поворот, обновляем близнеца
+                if (sibling.color == Node.RED) {
+                    sibling.color =  Node.BLACK;
+                    sibling.parent.color = Node.RED;
                     LeftRotate(node.parent);
-                    w = node.parent.right;
+                    sibling = node.parent.right;
                 }
 
-                if (w.left.color == Node.BLACK && w.right.color == Node.BLACK) {
-                    w.color = Node.RED;
+                // Если дети близнеца черные: близнец становится красным, родитель становится node
+                if (sibling.left.color == Node.BLACK && sibling.right.color == Node.BLACK) {
+                    sibling.color = Node.RED;
                     node = node.parent;
                 } else {
-                    if (w.right.color == Node.BLACK) {
-                        w.left.color = Node.RED;
-                        w.color = Node.BLACK;
+                    // Если близнец черный и только его правый ребенок черный: его левый ребенок становится красный, близнец становится черный, левый поворот, обновляем близнеца
+                    if (sibling.right.color == Node.BLACK) {
+                        sibling.left.color = Node.RED;
+                        sibling.color = Node.BLACK;
                         LeftRotate(node);
-                        w = node.parent.right;
+                        sibling = node.parent.right;
                     }
 
-                    w.color = node.parent.color;
+                    // Если близнец черный, а его левый ребенок красный: его левый ребенок становится черным, близнец становится черный, правый поворот, обновляем близнеца
+                    sibling.color = node.parent.color;
                     node.parent.color =  Node.BLACK;
-                    w.right.color = Node.BLACK;
+                    sibling.right.color = Node.BLACK;
                     RightRotate(node.parent);
                     node = root;
                 }
